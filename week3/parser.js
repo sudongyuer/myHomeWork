@@ -64,15 +64,15 @@ function computeCSS(element) {
         }
       }
 
-      console.log(
-        "\n\n******************computeCSS -> computedStylel",
-        "\ntagName=",
-        element.tagName,
-        "\nattribute=\n",
-        element.attributes,
-        "\ncomputedStyle=\n",
-        element.computedStyle
-      );
+      // console.log(
+      //   "\n\n******************computeCSS -> computedStylel",
+      //   "\ntagName=",
+      //   element.tagName,
+      //   "\nattribute=\n",
+      //   element.attributes,
+      //   "\ncomputedStyle=\n",
+      //   element.computedStyle
+      // );
     }
   }
 }
@@ -99,6 +99,8 @@ function match(element, selector) {
   return false;
 }
 function emit(token) {
+  // console.log("token=", token);
+
   let top = stack[stack.length - 1];
 
   if (token.type === "startTag") {
@@ -123,7 +125,7 @@ function emit(token) {
 
     top.children.push(element);
     // to do hhe
-    //element.parent = top;
+    element.parent = top;
 
     if (!token.isSelfClosing) {
       stack.push(element);
@@ -131,6 +133,7 @@ function emit(token) {
 
     currentTextNode = null;
   } else if (token.type === "endTag") {
+    // console.log("top.tagName=", top.tagName, " token.tagName=", token.tagName);
     if (top.tagName != token.tagName) {
       throw new Error("Tag start end doesn't match!");
     } else {
@@ -138,6 +141,8 @@ function emit(token) {
       if (top.tagName === "style") {
         addCSSRules(top.children[0].content);
       }
+
+      layout(top);
 
       stack.pop();
     }
@@ -266,7 +271,7 @@ function afterAttributeName(c) {
     return selfClosingStartTag;
   } else if (c === "=") {
     return beforeAttributeValue;
-  } else if (c === ">'") {
+  } else if (c === ">") {
     currentToken[currentAttribute.name] = currentAttribute.value;
     emit(currentToken);
     return data;

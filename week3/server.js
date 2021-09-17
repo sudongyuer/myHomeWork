@@ -16,34 +16,32 @@ http
 
         response.writeHead(200, { "Content-Type": "text/plain" });
 
-        const myHtml = `<html maaa=a atester=b>
+        const myHtml = `<html maaa=a >
       <head>
           <style>
-              body div #myid{
-                  width:100px;
-                  background-color: #ff1111;
-              }
-  
-              body div img{
-                  width:20px;
-                  background-color: #ff2222;
-                  
-              }
+        #container {
+            width:500px;
+            height:300px;
+            display:flex;
+        }
+        #container #myid {
+            width:200px;
+        }
 
-              body div .myclass{
-                width:30px;
-                background-color: #ff3333;
-                
-            }
+        #container .c1 {
+            flex:1;
+        }            
           </style>
       </head>
       <body>
-          <div>
-              <img id="myid" />
-              <img class='myclass' />
+          <div id="container" >
+              <div id="myid" />
+              <div class="c1" />
           </div>
       </body>
   </html>`;
+
+        //console.log("myHtml=", myHtml);
         response.end(myHtml);
       });
   })
