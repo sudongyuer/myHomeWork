@@ -124,8 +124,8 @@ function emit(token) {
     computeCSS(element);
 
     top.children.push(element);
-    // to do hhe
-    element.parent = top;
+    // to do hhe TypeError: Converting circular structure to JSON
+    // element.parent = top;
 
     if (!token.isSelfClosing) {
       stack.push(element);
@@ -150,7 +150,7 @@ function emit(token) {
   } else if (token.type == "text") {
     if (currentTextNode == null) {
       currentTextNode = {
-        tyep: "text",
+        type: "text",
         content: ""
       };
       top.children.push(currentTextNode);

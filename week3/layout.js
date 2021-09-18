@@ -1,3 +1,29 @@
+function getStyle(element) {
+  if (!element.style) element.style = {};
+
+  // console.log("getStyle -> computedStyle=", element.computedStyle);
+  for (let prop in element.computedStyle) {
+    let p = element.computedStyle.value;
+    element.style[prop] = element.computedStyle[prop].value;
+
+    if (element.style[prop].toString().match(/px$/)) {
+      element.style[prop] = parseInt(element.style[prop]);
+    }
+
+    if (element.style[prop].toString().match(/^[0-9\.]+$/)) {
+      element.style[prop] = parseInt(element.style[prop]);
+    }
+  }
+
+  console.log(
+    "getStyle -> element name=",
+    element.tagName,
+    " style=",
+    element.style
+  );
+  return element.style;
+}
+
 function layout(element) {
   // check if computedStyle is empty
   if (
@@ -18,7 +44,6 @@ function layout(element) {
   }
 
   let items = element.children.filter(e => e.type === "element");
-  console.log("layout -> items=", items);
 
   items.sort((a, b) => {
     return (a.order || 0) - (b.order || 0);
@@ -138,15 +163,17 @@ function layout(element) {
     let flexLines = [flexLine];
 
     let mainSpace = elementStyle[mainSize];
+    //hhe
+    //let crossSpace = elementStyle[crossSize];
     let crossSpace = 0;
 
-    console.log("layout -> elementStyle", elementStyle);
+    console.log("layout -> mainSpace", mainSpace, " crossSpace=", crossSpace);
 
     for (let i = 0; i < items.length; i++) {
       let item = items[i];
       let itemStyle = getStyle(item);
 
-      if (itemStyle[mainSize] === null) {
+      if (itemStyle[mainSize] === null || itemStyle[mainSize] === undefined) {
         itemStyle[mainSize] = 0;
       }
 
@@ -166,6 +193,7 @@ function layout(element) {
         }
 
         if (mainSpace < itemStyle[mainSize]) {
+          //hhe ?
           flexLine.mainSpace = mainSpace;
           flexLine.crossSpace = crossSpace;
           flexLine = [item];
@@ -249,12 +277,12 @@ function layout(element) {
           }
 
           if (style.justifyContent === "flex-end") {
-            currentMain = mainBase * mainSign + mainBase;
+            currentMain = mainSpace * mainSign + mainBase;
             step = 0;
           }
 
           if (style.justifyContent === "center") {
-            currentMain = (mainBase / 2) * mainSign + mainBase;
+            currentMain = (mainSpace / 2) * mainSign + mainBase;
             step = 0;
           }
 
@@ -280,8 +308,8 @@ function layout(element) {
       });
     }
 
+    crossSpace = null;
     //compute the cross axis size
-    let crossSpce;
     if (!style[crossSize]) {
       // auto sizing
       crossSpace = 0;
@@ -334,7 +362,7 @@ function layout(element) {
       crossBase += 0;
     }
 
-    flexLines.forEach(function(item) {
+    flexLines.forEach(function(items) {
       let lineCrossSize =
         style.alignContent === "stretch"
           ? items.crossSpace + crossSpace / flexLines.length
@@ -370,48 +398,24 @@ function layout(element) {
             itemStyle[crossStart] + crossSign * itemStyle[crossSize];
         }
 
-        // hhe to do
         if (align === "stretch") {
           itemStyle[crossStart] = crossBase;
           itemStyle[crossEnd] =
             crossBase +
             crossSign *
-              (itemStyle[crossSize] !== null && itemStyle[crossSize]
+              (itemStyle[crossSize] !== null &&
+              itemStyle[crossSize] !== undefined
                 ? itemStyle[crossSize]
-                : itemStyle[crossSize]);
-          itemStyle[crossSize] = crossSign * itemStyle[crossSize];
+                : lineCrossSize); //hhe not sure
+          itemStyle[crossSize] =
+            crossSign * (itemStyle[crossEnd] - itemStyle[crossStart]);
         }
       }
 
       crossBase += crossSign * (lineCrossSize + step);
     });
-    console.log("items=", items);
+    // console.log("items=", items);
   }
-}
-function getStyle(element) {
-  if (!element.style) element.style = {};
-
-  // console.log("getStyle -> computedStyle=", element.computedStyle);
-  for (let prop in element.computedStyle) {
-    let p = element.computedStyle.value;
-    element.style[prop] = element.computedStyle[prop].value;
-
-    if (element.style[prop].toString().match(/px$/)) {
-      element.style[prop] = parseInt(element.style[prop]);
-    }
-
-    if (element.style[prop].toString().match(/^[0-9\.]+$/)) {
-      element.style[prop] = parseInt(element.style[prop]);
-    }
-  }
-
-  console.log(
-    "getStyle -> element name=",
-    element.tagName,
-    " style=",
-    element.style
-  );
-  return element.style;
 }
 
 module.exports = layout;
