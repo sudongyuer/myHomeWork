@@ -1,0 +1,107 @@
+<pre>
+<script>
+
+  class XRegExp{
+
+    constructor(source, flag, root ="root"){
+      this.table = new Map();
+
+     this.regexp= new RegExp( this.compileRegExp(source, root, 0), flag);
+     console.log("XRegExp -> constructor -> regexp", this.regexp)
+     
+
+    }
+
+    compileRegExp(source, name, start) {
+      if (source[name] instanceof RegExp){
+        console.log(name, " =", source[name].source);
+      }
+      else{
+        console.log(name, " =", source[name]);
+      }
+      
+      if (source[name] instanceof RegExp) {
+        return source[name].source;
+      }
+      let length = 0 ;
+      let regexp = source[name].replace(/\<([^>]+)\>/g, (str, $1) => {
+        this.table.set(start, $1);
+        this.table.set($1, start);
+        ++length;
+        let r= this.compileRegExp(source, $1);
+        length += r.length
+        return r.source;
+      });
+
+      return {source: regexp, length:length};
+  }
+    exec(){}
+
+    get lastIndex(){
+
+    }
+
+    set lastIndex(value){
+
+    }
+
+  }
+  const myXregrexp = {
+    // InputElement: "<Whitespace>|<LineTerminator>|<Comments>|<Token>",
+    InputElement: "<Whitespace>|<LineTerminator>|<Comments>",
+    Whitespace: / /,
+    LineTerminator: /\n/,
+    Comments: /\/\*([^*]|\*[^\/])*\*\/|\/\/[^\n]*/,
+    Token: "<Literal>|<Keywords>|<Identifer>|<Punctuator>",
+    Literal:
+      "<NumericalLiteral>|<BooleanLiteral>|<StringLiteral>|<NullLiteral>",
+    NumericalLiteral: /([1-9][0-9]*|0)(?:\.[0-9]*)?|\.[0-9]+/,
+    BooleanLiteral: /true| false/,
+    StringLiteral: /\"(?:[^"\n]|\\[\s\S])*\"|\'(?:[^'\n]|\\[\s\S])*\'/,
+    NullLiteral: /null/,
+    Identifer: /[a-zA-Z_$][a-zA-Z0-9_$]*/,
+    Keywords: /if|else|for|function|let/,
+    Punctuator: /\{|\}|\(|\<|\+\+|\=\=|=>|=|\*|\)|\[|\]|;|\.|\+|\?|\:|\,/
+  };
+
+  // function compileRegExp(xregexp, name) {
+  //   console.log(name, " =", xregexp[name].source);
+  //   if (xregexp[name] instanceof RegExp) {
+  //     return xregexp[name].source;
+  //   }
+  //   let regexp = xregexp[name].replace(/\<([^>]+)\>/g, (str, $1) => {
+  //     return compileRegExp(xregexp, $1);
+  //   });
+
+  //   return regexp;
+  // }
+  function scan(str) {
+    let regexp = new XRegExp( myXregrexp, "g", "InputElement" );
+    //console.log(regexp);
+
+    while (regexp.lastIndex < str.length) {
+      //console.log("\n regexp.lastIndex =", regexp.lastIndex);
+      let r = regexp.exec(str);
+      //console.log("\nend--r=", r, " regexp.lastIndex =", regexp.lastIndex);
+      console.log(JSON.stringify(r[0]));
+      document.write(r[0])
+    }
+  }
+
+  const toScan = `
+   for(let i=0; i<3;i++){
+     for (let j=0; j<3; j++){
+       let cell = document.createElement("div");
+       cell.classList.add("cell");
+       cell.innerText= pattern[i*3 +j] ==2? "X":
+         pattern[i*3 +j] ==1 ? "O": "";
+         cell.addEventListerner("click", () => userMove(j,i));
+         board.appendChild(cell);
+         a=4;
+     }
+     board.appendChild(document.createElement("br"))
+   }
+  `;
+  scan(toScan);
+</script>
+</pre>
